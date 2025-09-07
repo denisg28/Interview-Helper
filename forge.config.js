@@ -5,7 +5,7 @@ module.exports = {
     packagerConfig: {
         asar: true,
         extraResource: ['./src/assets/SystemAudioDump'],
-        name: 'Cheating Daddy',
+    name: 'InterviewAI',
         icon: 'src/assets/logo',
         // use `security find-identity -v -p codesigning` to find your identity
         // for macos signing
@@ -30,11 +30,22 @@ module.exports = {
         {
             name: '@electron-forge/maker-squirrel',
             config: {
-                name: 'cheating-daddy',
-                productName: 'Cheating Daddy',
-                shortcutName: 'Cheating Daddy',
+                name: 'interviewai',
+                productName: 'InterviewAI',
+                shortcutName: 'InterviewAI',
                 createDesktopShortcut: true,
                 createStartMenuShortcut: true,
+            },
+        },
+        {
+            name: '@electron-forge/maker-zip',
+            platforms: ['win32'],
+            config: {
+                options: {
+                    name: 'InterviewAI',
+                    productName: 'InterviewAI',
+                    icon: 'src/assets/logo.png'
+                }
             },
         },
         {
@@ -46,8 +57,8 @@ module.exports = {
             platforms: ['linux'],
             config: {
                 options: {
-                    name: 'Cheating Daddy',
-                    productName: 'Cheating Daddy',
+                    name: 'InterviewAI',
+                    productName: 'InterviewAI',
                     genericName: 'AI Assistant',
                     description: 'AI assistant for interviews and learning',
                     categories: ['Development', 'Education'],
