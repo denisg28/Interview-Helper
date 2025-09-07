@@ -1,20 +1,34 @@
 // renderer.js
-const { ipcRenderer } = require('electron');
+
+let ipcRenderer;
+try {
+    // Only require if running in Electron/Node
+    if (typeof require !== 'undefined' && typeof window !== 'undefined' && window.process && window.process.type === 'renderer') {
+        ipcRenderer = require('electron').ipcRenderer;
+    }
+} catch (e) {
+    ipcRenderer = null;
+}
 
 // Initialize random display name for UI components
 window.randomDisplayName = null;
 
-// Request random display name from main process
-ipcRenderer
-    .invoke('get-random-display-name')
-    .then(name => {
-        window.randomDisplayName = name;
-        console.log('Set random display name:', name);
-    })
-    .catch(err => {
-        console.warn('Could not get random display name:', err);
-        window.randomDisplayName = 'System Monitor';
-    });
+
+// Request random display name from main process (only if ipcRenderer is available)
+if (ipcRenderer) {
+    ipcRenderer
+        .invoke('get-random-display-name')
+        .then(name => {
+            window.randomDisplayName = name;
+            console.log('Set random display name:', name);
+        })
+        .catch(err => {
+            console.warn('Could not get random display name:', err);
+            window.randomDisplayName = 'System Monitor';
+        });
+} else {
+    window.randomDisplayName = 'System Monitor';
+}
 
 let mediaStream = null;
 let screenshotInterval = null;
