@@ -176,10 +176,13 @@ async function initializeGemini(profile = 'interview', language = 'en-US') {
 }
 
 // Listen for status updates
-ipcRenderer.on('update-status', (event, status) => {
-    console.log('Status update:', status);
-    cheddar.setStatus(status);
-});
+
+if (ipcRenderer && typeof ipcRenderer.on === 'function') {
+    ipcRenderer.on('update-status', (event, status) => {
+        console.log('Status update:', status);
+        cheddar.setStatus(status);
+    });
+}
 
 // Listen for responses - REMOVED: This is handled in SecureAppMain.js to avoid duplicates
 // ipcRenderer.on('update-response', (event, response) => {
