@@ -13,15 +13,15 @@
         "test": "vitest run"
     },
     "keywords": [
-    "secure app",
-    "secure desktop assistant",
-    "secure ai assistant",
-    "secure overlay",
-    "secure productivity"
+        "secure app",
+        "secure desktop assistant",
+        "secure ai assistant",
+        "secure overlay",
+        "secure productivity"
     ],
     "author": {
-    "name": "anonymous",
-    "email": "anonymous@secure-app.com"
+        "name": "anonymous",
+        "email": "anonymous@secure-app.com"
     },
     "license": "GPL-3.0",
     "dependencies": {
@@ -39,8 +39,8 @@
         "@electron-forge/plugin-fuses": "^7.8.1",
         "@electron/fuses": "^1.8.0",
         "@reforged/maker-appimage": "^5.0.0",
-        "vitest": "^1.6.1",
+        "electron": "^38.0.0",
         "jsdom": "^23.2.0",
-        "electron": "^30.0.5"
+        "vitest": "^3.2.4"
     }
 }
