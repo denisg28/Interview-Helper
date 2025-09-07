@@ -1,24 +1,37 @@
 name: Node.js CI
 
 on:
-    push:
-        branches: [main]
-    pull_request:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
-    build:
-        strategy:
-            fail-fast: true
-            matrix:
-                os: [ubuntu-latest, windows-latest]
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
-        runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 'lts/*'
-                  cache: 'npm'
-            - run: npm install
-            - run: npm test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+      # Очистка node_modules и npm cache для Windows
+      - name: Clean node_modules (Windows only)
+        if: runner.os == 'Windows'
+        run: |
+          if (Test-Path -Path .\node_modules) { Remove-Item -Recurse -Force .\node_modules }
+          npm cache clean --force
+        shell: pwsh
+      # Очистка node_modules и npm cache для Linux
+      - name: Clean node_modules (Linux only)
+        if: runner.os == 'Linux'
+        run: |
+          rm -rf node_modules
+          npm cache clean --force
+      - run: npm install
+      - run: npm test
