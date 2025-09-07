@@ -45,8 +45,8 @@ let offscreenCanvas = null;
 let offscreenContext = null;
 let currentImageQuality = 'medium'; // Store current image quality for manual screenshots
 
-const isLinux = process.platform === 'linux';
-const isMacOS = process.platform === 'darwin';
+const isLinux = typeof process !== 'undefined' && process.platform === 'linux';
+const isMacOS = typeof process !== 'undefined' && process.platform === 'darwin';
 
 // Token tracking system for rate limiting
 let tokenTracker = {
