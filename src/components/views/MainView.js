@@ -302,7 +302,7 @@ export class MainView extends LitElement {
                 </div>
                 <p class="description">
                     Don't have an API key?
-                    <span @click=${this.handleAPIKeyHelpClick} class="link">Get one here</span>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link">Get one here</a>
                 </p>
         `;
     }

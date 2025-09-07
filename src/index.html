@@ -2,7 +2,8 @@
 <!doctype html>
 <html>
     <head>
-        <meta http-equiv="content-security-policy" content="script-src 'self' 'unsafe-inline'" />
+    <meta charset="UTF-8">
+    <meta http-equiv="content-security-policy" content="script-src 'self' 'unsafe-inline'" />
         <title>Screen and Audio Capture</title>
         <style>
             :root {
@@ -111,6 +112,13 @@
         <script src="utils/renderer.js"></script>
         <script>
 window.addEventListener('DOMContentLoaded', async () => {
+    // Автоматическая подсветка всех <pre><code> и <code> блоков
+    if (window.hljs) {
+        document.querySelectorAll('pre code, code').forEach(block => {
+            window.hljs.highlightElement(block);
+        });
+    }
+
     if (!window.cheddarKey.checkAccess()) {
         // Модальное окно
         const modal = document.createElement('div');

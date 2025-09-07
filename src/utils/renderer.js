@@ -778,14 +778,33 @@ const cheddar = {
     // Status and response functions
     setStatus: text => secureAppMain.setStatus(text),
     setResponse: response => {
-        // Явно указываем язык для корректного отображения текста
+        // Ensure correct encoding and language for Russian text
         if (typeof response === 'object' && response.text) {
-            // Пример: если есть поле language, используем его
-            const lang = response.language || localStorage.getItem('geminiLanguage') || 'ru-RU';
-            // Преобразуем текст в строку с правильной кодировкой
-            const decodedText = typeof response.text === 'string' ? response.text : String(response.text);
-            // Можно добавить обработку Unicode, если потребуется
+            let lang = response.language || localStorage.getItem('geminiLanguage') || 'en-US';
+            let decodedText = typeof response.text === 'string' ? response.text : String(response.text);
+            // Detect Russian text and set language to ru-RU
+            if (/\p{Script=Cyrillic}/u.test(decodedText)) {
+                lang = 'ru-RU';
+            }
+            // Decode any garbled text (try to fix encoding issues)
+            try {
+                // If text is Buffer or Uint8Array, decode as UTF-8
+                if (typeof Buffer !== 'undefined' && Buffer.isBuffer(decodedText)) {
+                    decodedText = Buffer.from(decodedText).toString('utf8');
+                } else if (decodedText instanceof Uint8Array) {
+                    decodedText = new TextDecoder('utf-8').decode(decodedText);
+                }
+            } catch (e) {
+                // Fallback: leave as-is
+            }
             secureAppMain.setResponse({ ...response, text: decodedText, language: lang });
+        } else if (typeof response === 'string') {
+            // Detect Russian text in string responses
+            let lang = 'en-US';
+            if (/\p{Script=Cyrillic}/u.test(response)) {
+                lang = 'ru-RU';
+            }
+            secureAppMain.setResponse({ text: response, language: lang });
         } else {
             secureAppMain.setResponse(response);
         }
