@@ -298,7 +298,7 @@ export class MainView extends LitElement {
                 </button>
             </div>
                 <div class="main-header">
-                    <h1>Secure Desktop Assistant</h1>
+                    <h1>Interview Helper by Denis</h1>
                 </div>
                 <p class="description">
                     Don't have an API key?

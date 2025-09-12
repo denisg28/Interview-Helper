@@ -174,15 +174,15 @@ export class AppHeader extends LitElement {
 
     getViewTitle() {
         const titles = {
-            onboarding: 'Welcome to Secure Desktop Assistant',
-            main: 'Secure Desktop Assistant',
+            onboarding: 'Welcome to Interview Helper by Denis',
+            main: 'Interview Helper by Denis',
             customize: 'Customize',
             help: 'Help & Shortcuts',
             history: 'Conversation History',
             advanced: 'Advanced Tools',
-            assistant: 'Secure Desktop Assistant',
+            assistant: 'Interview Helper by Denis',
         };
-        return titles[this.currentView] || 'Secure Desktop Assistant';
+        return titles[this.currentView] || 'Interview Helper by Denis';
     }
 
     getElapsedTime() {

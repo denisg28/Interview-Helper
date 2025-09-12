@@ -118,7 +118,8 @@ export class SecureAppMain extends LitElement {
 
     constructor() {
         super();
-        this.currentView = localStorage.getItem('onboardingCompleted') ? 'main' : 'onboarding';
+    const onboardingFlag = localStorage.getItem('onboardingCompleted');
+    this.currentView = onboardingFlag === 'true' ? 'main' : 'onboarding';
         this.statusText = '';
         this.startTime = null;
         this.isRecording = false;
@@ -349,7 +350,8 @@ export class SecureAppMain extends LitElement {
 
     // Onboarding event handlers
     handleOnboardingComplete() {
-        this.currentView = 'main';
+    localStorage.setItem('onboardingCompleted', 'true');
+    this.currentView = 'main';
     }
 
     updated(changedProperties) {
