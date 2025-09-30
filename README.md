@@ -51,3 +51,4 @@ sudo chown -R $(whoami) InterviewAI.app
 sudo chmod -R u+rwX InterviewAI.app
 codesign --force --deep --sign - InterviewAI.app
 xattr -dr com.apple.quarantine InterviewAI.app
+chmod +x /Applications/InterviewAI.app/Contents/Resources/SystemAudioDump
