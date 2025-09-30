@@ -7,6 +7,9 @@ import { HistoryView } from '../views/HistoryView.js';
 import { AssistantView } from '../views/AssistantView.js';
 import { OnboardingView } from '../views/OnboardingView.js';
 import { AdvancedView } from '../views/AdvancedView.js';
+import '../views/ChatViewLit.js';
+import RoleSelect from './RoleSelect.js';
+import ChatView from '../views/ChatView.js';
 
 export class SecureAppMain extends LitElement {
     static styles = css`
@@ -114,6 +117,7 @@ export class SecureAppMain extends LitElement {
         _isClickThrough: { state: true },
         _awaitingNewResponse: { state: true },
         shouldAnimateResponse: { type: Boolean },
+        role: { type: String },
     };
 
     constructor() {
@@ -137,7 +141,13 @@ export class SecureAppMain extends LitElement {
         this._awaitingNewResponse = false;
         this._currentResponseIsComplete = true;
         this.shouldAnimateResponse = false;
+        this.role = null;
         this.updateLayoutMode();
+        // Включаем stealth-режим: окно прозрачно для захвата экрана
+        if (window.require) {
+            const { ipcRenderer } = window.require('electron');
+            ipcRenderer.invoke('set-stealth-mode', true);
+        }
     }
 
     connectedCallback() {
@@ -304,52 +314,50 @@ export class SecureAppMain extends LitElement {
         localStorage.setItem('onboardingCompleted', 'true');
         this.currentView = 'main';
     }
-    updated(changedProperties) {
-        super.updated(changedProperties);
-        if (changedProperties.has('currentView') && window.require) {
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('view-changed', this.currentView);
-            const viewContainer = this.shadowRoot?.querySelector('.view-container');
-            if (viewContainer) {
-                viewContainer.classList.add('entering');
-                requestAnimationFrame(() => {
-                    viewContainer.classList.remove('entering');
-                });
-            }
-        }
-        if (changedProperties.has('selectedProfile')) {
-            localStorage.setItem('selectedProfile', this.selectedProfile);
-        }
-        if (changedProperties.has('selectedLanguage')) {
-            localStorage.setItem('selectedLanguage', this.selectedLanguage);
-        }
-        if (changedProperties.has('selectedScreenshotInterval')) {
-            localStorage.setItem('selectedScreenshotInterval', this.selectedScreenshotInterval);
-        }
-        if (changedProperties.has('selectedImageQuality')) {
-            localStorage.setItem('selectedImageQuality', this.selectedImageQuality);
-        }
-        if (changedProperties.has('layoutMode')) {
-            this.updateLayoutMode();
-        }
-        if (changedProperties.has('advancedMode')) {
-            localStorage.setItem('advancedMode', this.advancedMode.toString());
-        }
-    }
     renderCurrentView() {
         const viewKey = `${this.currentView}-${this.selectedProfile}-${this.selectedLanguage}`;
+        // Экран выбора роли
+        if (!this.role && this.currentView === 'main') {
+            return html`
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:80vh;">
+                    <h2>Выберите роль</h2>
+                    <div style="margin:16px;">
+                        <button @click=${() => { this.role = 'user'; this.requestUpdate(); }}>Пользователь</button>
+                        <button @click=${() => { this.role = 'admin'; this.requestUpdate(); }} style="margin-left:12px;">Админ</button>
+                    </div>
+                </div>
+            `;
+        }
         switch (this.currentView) {
             case 'onboarding':
                 return html`
                     <onboarding-view .onComplete=${() => this.handleOnboardingComplete()} .onClose=${() => this.handleClose()}></onboarding-view>
                 `;
             case 'main':
+                if (this.role === 'user') {
+                    return html`
+                        <main-view
+                            .onStart=${() => this.handleStart()}
+                            .onAPIKeyHelp=${() => this.handleAPIKeyHelp()}
+                            .onLayoutModeChange=${layoutMode => this.handleLayoutModeChange(layoutMode)}
+                        ></main-view>
+                        <div style="text-align:center;margin-top:32px;">
+                            <button @click=${() => { this.currentView = 'chat'; this.requestUpdate(); }} style="font-size:1.1em;padding:10px 24px;">Chat with Admin</button>
+                        </div>
+                    `;
+                } else if (this.role === 'admin') {
+                    return html`
+                        <main-view
+                            .onStart=${() => this.handleStart()}
+                            .onAPIKeyHelp=${() => this.handleAPIKeyHelp()}
+                            .onLayoutModeChange=${layoutMode => this.handleLayoutModeChange(layoutMode)}
+                        ></main-view>
+                    `;
+                }
+                break;
+            case 'chat':
                 return html`
-                    <main-view
-                        .onStart=${() => this.handleStart()}
-                        .onAPIKeyHelp=${() => this.handleAPIKeyHelp()}
-                        .onLayoutModeChange=${layoutMode => this.handleLayoutModeChange(layoutMode)}
-                    ></main-view>
+                    <chat-view-lit .role=${this.role}></chat-view-lit>
                 `;
             case 'customize':
                 return html`
@@ -394,13 +402,75 @@ export class SecureAppMain extends LitElement {
                 return html`<div>Unknown view: ${this.currentView}</div>`;
         }
     }
+    firstUpdated() {
+        if (!this.role) {
+            const container = this.shadowRoot.getElementById('role-select');
+            if (container) {
+                const mount = document.createElement('div');
+                container.appendChild(mount);
+                window.ReactDOM.render(
+                    window.React.createElement(RoleSelect, {
+                        onSelect: (role) => {
+                            this.role = role;
+                            this.requestUpdate();
+                        }
+                    }),
+                    mount
+                );
+            }
+        }
+    }
+
+    updated(changedProperties) {
+        super.updated(changedProperties);
+        if (changedProperties.has('currentView') && window.require) {
+            const { ipcRenderer } = window.require('electron');
+            ipcRenderer.send('view-changed', this.currentView);
+            const viewContainer = this.shadowRoot?.querySelector('.view-container');
+            if (viewContainer) {
+                viewContainer.classList.add('entering');
+                requestAnimationFrame(() => {
+                    viewContainer.classList.remove('entering');
+                });
+            }
+        }
+        if (changedProperties.has('selectedProfile')) {
+            localStorage.setItem('selectedProfile', this.selectedProfile);
+        }
+        if (changedProperties.has('selectedLanguage')) {
+            localStorage.setItem('selectedLanguage', this.selectedLanguage);
+        }
+        if (changedProperties.has('selectedScreenshotInterval')) {
+            localStorage.setItem('selectedScreenshotInterval', this.selectedScreenshotInterval);
+        }
+        if (changedProperties.has('selectedImageQuality')) {
+            localStorage.setItem('selectedImageQuality', this.selectedImageQuality);
+        }
+        if (changedProperties.has('layoutMode')) {
+            this.updateLayoutMode();
+        }
+        if (changedProperties.has('advancedMode')) {
+            localStorage.setItem('advancedMode', this.advancedMode.toString());
+        }
+        if (this.currentView === 'chat') {
+            const container = this.shadowRoot.getElementById('chat-view');
+            if (container && !container.hasChildNodes()) {
+                const mount = document.createElement('div');
+                container.appendChild(mount);
+                window.ReactDOM.render(
+                    window.React.createElement(ChatView, { role: this.role }),
+                    mount
+                );
+            }
+        }
+    }
     render() {
         const mainContentClass = `main-content ${
             this.currentView === 'assistant' ? 'assistant-view' : this.currentView === 'onboarding' ? 'onboarding-view' : 'with-border'
         }`;
         return html`
-            <div class="window-container">
-                <div class="container">
+            <div class="window-container" style="pointer-events:auto;">
+                <div class="container" style="opacity:0.98;filter:blur(0px);">
                     <app-header
                         .currentView=${this.currentView}
                         .statusText=${this.statusText}

@@ -7,6 +7,7 @@ import { HistoryView } from '../views/HistoryView.js';
 import { AssistantView } from '../views/AssistantView.js';
 import { OnboardingView } from '../views/OnboardingView.js';
 import { AdvancedView } from '../views/AdvancedView.js';
+import '../views/ChatViewLit.js';
 
 export class SecureAppMain extends LitElement {
     static styles = css`
@@ -114,12 +115,13 @@ export class SecureAppMain extends LitElement {
         _isClickThrough: { state: true },
         _awaitingNewResponse: { state: true },
         shouldAnimateResponse: { type: Boolean },
+        role: { type: String },
     };
 
     constructor() {
         super();
-    const onboardingFlag = localStorage.getItem('onboardingCompleted');
-    this.currentView = onboardingFlag === 'true' ? 'main' : 'onboarding';
+        const onboardingFlag = localStorage.getItem('onboardingCompleted');
+        this.currentView = onboardingFlag === 'true' ? 'main' : 'onboarding';
         this.statusText = '';
         this.startTime = null;
         this.isRecording = false;
@@ -137,8 +139,7 @@ export class SecureAppMain extends LitElement {
         this._awaitingNewResponse = false;
         this._currentResponseIsComplete = true;
         this.shouldAnimateResponse = false;
-
-        // Apply layout mode to document root
+        this.role = null;
         this.updateLayoutMode();
     }
 
@@ -394,24 +395,53 @@ export class SecureAppMain extends LitElement {
     }
 
     renderCurrentView() {
-        // Only re-render the view if it hasn't been cached or if critical properties changed
         const viewKey = `${this.currentView}-${this.selectedProfile}-${this.selectedLanguage}`;
-
+        // Экран выбора роли
+        if (!this.role && this.currentView === 'main') {
+            return html`
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:80vh;">
+                    <h2 style="font-size:2em;font-weight:600;margin-bottom:32px;color:#3a7afe;text-shadow:0 2px 8px rgba(58,122,254,0.12);">Выберите роль</h2>
+                    <div style="display:flex;gap:24px;">
+                        <button @click=${() => { this.role = 'user'; this.requestUpdate(); }} style="padding:18px 38px;font-size:1.2em;border-radius:12px;border:none;background:linear-gradient(90deg,#3a7afe 0%,#1e90ff 100%);color:#fff;font-weight:500;box-shadow:0 2px 8px rgba(58,122,254,0.12);cursor:pointer;transition:background 0.2s;">Пользователь</button>
+                        <button @click=${() => { this.role = 'admin'; this.requestUpdate(); }} style="padding:18px 38px;font-size:1.2em;border-radius:12px;border:none;background:linear-gradient(90deg,#232526 0%,#414345 100%);color:#fff;font-weight:500;box-shadow:0 2px 8px rgba(40,44,52,0.12);cursor:pointer;transition:background 0.2s;">Админ</button>
+                    </div>
+                </div>
+            `;
+        }
         switch (this.currentView) {
             case 'onboarding':
                 return html`
                     <onboarding-view .onComplete=${() => this.handleOnboardingComplete()} .onClose=${() => this.handleClose()}></onboarding-view>
                 `;
-
             case 'main':
+                if (this.role === 'user') {
+                    return html`
+                        <main-view
+                            .onStart=${() => this.handleStart()}
+                            .onAPIKeyHelp=${() => this.handleAPIKeyHelp()}
+                            .onLayoutModeChange=${layoutMode => this.handleLayoutModeChange(layoutMode)}
+                        ></main-view>
+                        <div style="text-align:center;margin-top:32px;">
+                            <button @click=${() => { this.currentView = 'chat'; this.requestUpdate(); }} style="font-size:1.2em;padding:16px 38px;border-radius:12px;border:none;background:linear-gradient(90deg,#3a7afe 0%,#1e90ff 100%);color:#fff;font-weight:500;box-shadow:0 2px 8px rgba(58,122,254,0.12);cursor:pointer;transition:background 0.2s;">Открыть чат с админом</button>
+                        </div>
+                    `;
+                } else if (this.role === 'admin') {
+                    return html`
+                        <main-view
+                            .onStart=${() => this.handleStart()}
+                            .onAPIKeyHelp=${() => this.handleAPIKeyHelp()}
+                            .onLayoutModeChange=${layoutMode => this.handleLayoutModeChange(layoutMode)}
+                        ></main-view>
+                        <div style="text-align:center;margin-top:32px;">
+                            <button @click=${() => { this.currentView = 'chat'; this.requestUpdate(); }} style="font-size:1.2em;padding:16px 38px;border-radius:12px;border:none;background:linear-gradient(90deg,#232526 0%,#414345 100%);color:#fff;font-weight:500;box-shadow:0 2px 8px rgba(40,44,52,0.12);cursor:pointer;transition:background 0.2s;">Открыть чат с пользователем</button>
+                        </div>
+                    `;
+                }
+                break;
+            case 'chat':
                 return html`
-                    <main-view
-                        .onStart=${() => this.handleStart()}
-                        .onAPIKeyHelp=${() => this.handleAPIKeyHelp()}
-                        .onLayoutModeChange=${layoutMode => this.handleLayoutModeChange(layoutMode)}
-                    ></main-view>
+                    <chat-view-lit .role=${this.role}></chat-view-lit>
                 `;
-
             case 'customize':
                 return html`
                     <customize-view
@@ -429,16 +459,12 @@ export class SecureAppMain extends LitElement {
                         .onAdvancedModeChange=${advancedMode => this.handleAdvancedModeChange(advancedMode)}
                     ></customize-view>
                 `;
-
             case 'help':
                 return html` <help-view .onExternalLinkClick=${url => this.handleExternalLinkClick(url)}></help-view> `;
-
             case 'history':
                 return html` <history-view></history-view> `;
-
             case 'advanced':
                 return html` <advanced-view></advanced-view> `;
-
             case 'assistant':
                 return html`
                     <assistant-view
@@ -451,12 +477,10 @@ export class SecureAppMain extends LitElement {
                         @response-animation-complete=${() => {
                             this.shouldAnimateResponse = false;
                             this._currentResponseIsComplete = true;
-                            console.log('[response-animation-complete] Marked current response as complete');
                             this.requestUpdate();
                         }}
                     ></assistant-view>
                 `;
-
             default:
                 return html`<div>Unknown view: ${this.currentView}</div>`;
         }
