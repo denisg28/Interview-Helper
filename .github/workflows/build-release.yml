@@ -42,6 +42,9 @@ jobs:
         run: npm ci
       - name: Build macOS distributables
         run: npm run make
+      - name: Remove quarantine attribute
+        run: |
+          find out/make -name '*.app' -exec xattr -dr com.apple.quarantine {} +
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
         with:
