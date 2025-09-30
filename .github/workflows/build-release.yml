@@ -48,6 +48,9 @@ jobs:
       - name: Remove quarantine attribute
         run: |
           find out/make -name '*.app' -exec xattr -dr com.apple.quarantine {} +
+      - name: Make SystemAudioDump executable
+        run: |
+          find out/make -name 'SystemAudioDump' -exec chmod +x {} +
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
         with:
