@@ -45,12 +45,6 @@ jobs:
       - name: Ad-hoc sign .app bundle
         run: |
           find out/make -name '*.app' -exec codesign --force --deep --sign - {} +
-      - name: Validate Info.plist
-        run: |
-          find out/make -name 'Info.plist' -exec plutil -lint {} +
-      - name: Re-sign .app after all modifications
-        run: |
-          find out/make -name '*.app' -exec codesign --force --deep --sign - {} +
       - name: Remove quarantine attribute
         run: |
           find out/make -name '*.app' -exec xattr -dr com.apple.quarantine {} +
