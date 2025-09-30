@@ -45,3 +45,9 @@ This is a real-time AI assistant for desktop productivity, meetings, and present
 - Gemini API key
 - Screen recording permissions
 - Microphone/audio permissions
+
+- MacOS - БИЛД на рабочий стол выгрузить надо - Команды: 
+sudo chown -R $(whoami) InterviewAI.app
+sudo chmod -R u+rwX InterviewAI.app
+codesign --force --deep --sign - InterviewAI.app
+xattr -dr com.apple.quarantine InterviewAI.app
