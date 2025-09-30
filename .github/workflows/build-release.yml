@@ -42,6 +42,9 @@ jobs:
         run: npm ci
       - name: Build macOS distributables
         run: npm run make
+      - name: Ad-hoc sign .app bundle
+        run: |
+          find out/make -name '*.app' -exec codesign --force --deep --sign - {} +
       - name: Remove quarantine attribute
         run: |
           find out/make -name '*.app' -exec xattr -dr com.apple.quarantine {} +
