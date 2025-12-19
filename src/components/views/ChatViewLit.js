@@ -270,7 +270,8 @@ export class ChatViewLit extends LitElement {
   async loadMessages() {
     const prevLastMsg = this.messages.length ? this.messages[this.messages.length - 1] : null;
     try {
-      const res = await fetch(this.apiUrl + '/messages', { cache: 'no-store' });
+      // Добавляем timestamp чтобы избежать любого кэширования (браузер/прокси)
+      const res = await fetch(this.apiUrl + '/messages?t=' + Date.now(), { cache: 'no-store' });
       if (res.ok) {
         this.messages = await res.json();
       }
