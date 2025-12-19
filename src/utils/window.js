@@ -33,6 +33,8 @@ function createWindow(sendToRenderer, geminiSessionRef, randomNames = null) {
     const mainWindow = new BrowserWindow({
         width: windowWidth,
         height: windowHeight,
+        minWidth: 400,
+        minHeight: 300,
         frame: false,
         transparent: true,
         hasShadow: false,
@@ -61,7 +63,7 @@ function createWindow(sendToRenderer, geminiSessionRef, randomNames = null) {
         { useSystemPicker: true }
     );
 
-    mainWindow.setResizable(false);
+    mainWindow.setResizable(true);
     mainWindow.setContentProtection(true);
     mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
@@ -450,8 +452,6 @@ function setupWindowIpcHandlers(mainWindow, sendToRenderer, geminiSessionRef) {
 
                     // Check if window is still valid before final operations
                     if (!mainWindow.isDestroyed()) {
-                        mainWindow.setResizable(false);
-
                         // Ensure final size is exact
                         mainWindow.setSize(targetWidth, targetHeight);
                         const finalX = Math.floor((screenWidth - targetWidth) / 2);
