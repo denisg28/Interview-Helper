@@ -258,7 +258,7 @@ export class ChatViewLit extends LitElement {
   firstUpdated() {
     this._lastMsgText = '';
     this.loadMessages();
-    this.pollInterval = setInterval(() => this.loadMessages(), 3000);
+    this.pollInterval = setInterval(() => this.loadMessages(), 100);
     setTimeout(() => this.scrollToLastMsg(), 300);
   }
 
