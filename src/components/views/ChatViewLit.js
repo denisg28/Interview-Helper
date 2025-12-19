@@ -3,113 +3,38 @@ import { html, css, LitElement } from '../../assets/lit-core-2.7.4.min.js';
 export class ChatViewLit extends LitElement {
   static styles = css`
     :host {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: none;
-      z-index: 9999;
+      display: block;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     }
     .chat-container {
       display: flex;
       flex-direction: column;
-      .chat-container {
-        display: flex;
-        flex-direction: column;
-        min-height: 420px;
-        max-height: 80vh;
-        background: #222;
-        color: #fff;
-        border-radius: 12px;
-        max-width: 540px;
-        width: 100%;
-        margin: 0 auto;
-        font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-        box-shadow: 0 2px 16px #000;
-        overflow: visible;
-      }
-      min-height: 420px;
-      max-height: 80vh;
+      height: 100%;
       background: transparent;
       color: #fff;
-      border-radius: 16px;
-      max-width: 540px;
-      width: 100%;
-      margin: 0 auto;
-      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-      .input-row {
-        display: flex;
-        padding: 16px;
-        border-top: 1px solid #333;
-        background: #222;
-        border-radius: 0 0 12px 12px;
-        box-shadow: 0 -2px 8px #000;
-        backdrop-filter: blur(8px);
-      }
-      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-      overflow: visible;
+      overflow: hidden;
     }
     .messages {
       flex: 1;
-      padding: 24px 16px 8px 16px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
       align-items: flex-start;
-      overflow: visible;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
-      button {
-        padding: 10px 22px;
-        border-radius: 8px;
-        border: none;
-        background: #fff;
-        color: #222;
-        font-weight: 600;
-        font-size: 1em;
-        cursor: pointer;
-        box-shadow: 0 2px 16px #000;
-        transition: background 0.18s, color 0.18s;
-      }
     .input-row {
+      flex-shrink: 0;
       display: flex;
       padding: 16px;
-      button:hover {
-        background: rgba(255,255,255,0.85);
-        color: #007aff;
-      }
       border-top: 1px solid #333;
-      background: rgba(40,44,52,0.35);
-      border-radius: 0 0 16px 16px;
-      box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
-      backdrop-filter: blur(8px);
-    }
-    input {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: none;
-      margin-right: 12px;
-      input, textarea {
-        flex: 1;
-        padding: 10px 14px;
-        border-radius: 8px;
-        border: none;
-        margin-right: 12px;
-        background: #222;
-        color: #fff;
-        font-size: 1em;
-        outline: none;
-        box-shadow: 0 1px 4px #000;
-      }
-      background: #18191a;
-      color: #fff;
-      font-size: 1em;
-      outline: none;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      background: #222;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+      z-index: 10;
     }
     button {
       padding: 10px 22px;
@@ -117,40 +42,20 @@ export class ChatViewLit extends LitElement {
       border: none;
       background: linear-gradient(90deg, #3a7afe 0%, #1e90ff 100%);
       color: #fff;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 1em;
       cursor: pointer;
-      .msg-bubble {
-        background: #fff;
-        color: #222;
-        border-radius: 12px;
-        padding: 12px 16px;
-        font-size: 16px;
-        box-shadow: 0 2px 16px #000;
-        width: 100%;
-        text-align: left;
-        word-break: break-word;
-        white-space: pre-line;
-        border: 1px solid rgba(0,0,0,0.08);
-        margin: 0;
-        overflow-x: auto;
-      }
-      box-shadow: 0 2px 8px rgba(58,122,254,0.12);
-      transition: background 0.2s;
+      box-shadow: 0 2px 8px rgba(58,122,254,0.2);
+      transition: opacity 0.2s;
     }
     button:hover {
-      background: linear-gradient(90deg, #1e90ff 0%, #3a7afe 100%);
+      opacity: 0.9;
     }
     .msg {
       display: flex;
       align-items: flex-end;
       gap: 10px;
-      word-break: break-word;
       max-width: 100%;
-      margin-left: 0;
-      margin-right: 0;
-      flex-direction: row;
-      justify-content: flex-start;
     }
     .msg-bubble {
       background: rgba(40,44,52,0.55);
@@ -159,47 +64,17 @@ export class ChatViewLit extends LitElement {
       padding: 12px 16px;
       font-size: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-      width: 100%;
       text-align: left;
       word-break: break-word;
-      white-space: pre-line;
       border: 1px solid rgba(255,255,255,0.08);
-      margin: 0;
-      overflow-x: auto;
     }
-      .msg-bubble {
-        background: rgba(40,44,52,0.55);
-        color: #fff;
-        border-radius: 16px;
-        padding: 12px 16px;
-        font-size: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-        width: 100%;
-        text-align: left;
-        word-break: break-word;
-        white-space: pre-line;
-        border: 1px solid rgba(255,255,255,0.08);
-      }
-      .msg-bubble :is(p, ul, ol, pre, code, blockquote, h1, h2, h3, h4, h5, h6) {
-        margin: 0.5em 0;
-        text-align: left;
-        word-break: break-word;
-        white-space: pre-line;
-      }
-      .msg-bubble pre, .msg-bubble code {
-        background: #23272e;
-        color: #e6e6e6;
-        border-radius: 8px;
-        padding: 8px;
-        font-size: 15px;
-        overflow-x: auto;
-        font-family: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
-      }
-      .msg-bubble a {
-        color: #6cb4ff;
-        text-decoration: underline;
-        word-break: break-all;
-      }
+    .msg.user .msg-bubble {
+      background: linear-gradient(90deg, #3a7afe 0%, #1e90ff 100%);
+      border: none;
+    }
+    .msg.admin .msg-bubble {
+      background: #232526;
+    }
     .avatar {
       width: 32px;
       height: 32px;
@@ -211,29 +86,23 @@ export class ChatViewLit extends LitElement {
       font-weight: bold;
       font-size: 1.1em;
       color: #fff;
-      box-shadow: 0 2px 8px rgba(58,122,254,0.12);
-    }
-    .bubble {
-      padding: 12px 18px;
-      border-radius: 16px;
-      background: #18191a;
-      color: #fff;
-      font-size: 1em;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      position: relative;
-    }
-    .msg.user .bubble {
-      background: linear-gradient(90deg, #3a7afe 0%, #1e90ff 100%);
-      color: #fff;
-    }
-    .msg.admin .bubble {
-      background: #232526;
-      color: #fff;
+      flex-shrink: 0;
     }
     .role-label {
-      font-size: 0.85em;
-      opacity: 0.7;
-      margin-bottom: 2px;
+      font-size: 0.75em;
+      opacity: 0.6;
+      margin-bottom: 4px;
+      margin-left: 4px;
+    }
+    /* Markdown styles inside bubble */
+    .msg-bubble :is(p, ul, ol, pre, code, blockquote, h1, h2, h3, h4, h5, h6) {
+      margin: 0.5em 0;
+    }
+    .msg-bubble pre, .msg-bubble code {
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: monospace;
     }
   `;
 
