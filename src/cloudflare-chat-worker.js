@@ -35,7 +35,14 @@ export default {
         const stored = await env[kvKey].get('chat');
         if (stored) messages = JSON.parse(stored);
       } catch (e) {}
-      return new Response(JSON.stringify(messages), { headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify(messages), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
     }
 
     return new Response('Not found', { status: 404 });

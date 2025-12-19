@@ -268,17 +268,18 @@ export class ChatViewLit extends LitElement {
   }
 
   async loadMessages() {
-    let prevLastMsg = this.messages.length ? this.messages[this.messages.length - 1].text : '';
+    const prevLastMsg = this.messages.length ? this.messages[this.messages.length - 1] : null;
     try {
-      const res = await fetch(this.apiUrl + '/messages');
+      const res = await fetch(this.apiUrl + '/messages', { cache: 'no-store' });
       if (res.ok) {
         this.messages = await res.json();
       }
     } catch (e) {}
     this.requestUpdate();
-    // полу-автоскролл: если последнее сообщение изменилось, скроллим вниз
-    let newLastMsg = this.messages.length ? this.messages[this.messages.length - 1].text : '';
-    if (newLastMsg && newLastMsg !== prevLastMsg) {
+    
+    const newLastMsg = this.messages.length ? this.messages[this.messages.length - 1] : null;
+    // Scroll if new message appears (different time or text)
+    if (newLastMsg && (!prevLastMsg || newLastMsg.time !== prevLastMsg.time || newLastMsg.text !== prevLastMsg.text)) {
       setTimeout(() => this.scrollToLastMsg(), 0);
     }
   }
@@ -302,6 +303,16 @@ export class ChatViewLit extends LitElement {
       this.input = '';
       this.loadMessages();
     }
+  }
+
+  async sendHelpRequest() {
+    await fetch(this.apiUrl + '/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: this.role, text: '🆘 ПОЛЬЗОВАТЕЛЬ ЗАПРОСИЛ ПОМОЩЬ!' })
+    });
+    await this.loadMessages();
+    setTimeout(() => this.scrollToLastMsg(), 100);
   }
 
   render() {
@@ -332,7 +343,13 @@ export class ChatViewLit extends LitElement {
             <button @click=${() => this.sendMessage()}>Отправить</button>
             <button @click=${() => this.clearChat()} style="margin-left:12px;background:linear-gradient(90deg,#ff4e50 0%,#f9d423 100%);color:#fff;">Очистить чат</button>
           </div>
-        ` : ''}
+        ` : html`
+          <div class="input-row" style="justify-content: center; padding: 10px;">
+            <button @click=${() => this.sendHelpRequest()} style="background: #d32f2f; color: white; font-weight: bold; padding: 12px 24px; font-size: 1.1em; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: background 0.2s;">
+              🆘 Нужна помощь
+            </button>
+          </div>
+        `}
       </div>
     `;
 
