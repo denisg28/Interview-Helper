@@ -29,13 +29,14 @@ export default {
     // Вспомогательная функция для запросов к Redis
     const redisRequest = async (command, ...args) => {
       try {
-        const res = await fetch(`${redisUrl}/${command}`, {
+        // Используем корневой URL для отправки команд массивом — это самый надежный способ
+        const res = await fetch(redisUrl, {
           method: 'POST',
           headers: { 
             Authorization: `Bearer ${redisToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(args)
+          body: JSON.stringify([command, ...args])
         });
         const data = await res.json();
         // Если Upstash вернул ошибку
